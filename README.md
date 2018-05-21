@@ -1,2 +1,2 @@
 # GameDev
-2D Platformer
+2D Platformer Game
