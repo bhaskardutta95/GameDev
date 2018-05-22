@@ -1,0 +1,66 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class P : MonoBehaviour {
+
+	//refrence to the player, assigning the player transform
+	//public so that they are accessible via the inspector
+	public Transform target;	
+
+	//assigning the bounds so that the camera doesn't go beyond them
+	//public so that they are accessible via the inspector
+	public Transform LeftBound;
+	public Transform RigtBound;
+
+	//approximate time that it's gonna take form our original pos to our target pos
+	public float SmoothDampTime = 0.15f;
+
+	//Velocity var
+	private Vector3 SmoothDampVelocity = Vector3.zero;
+
+	//Minimum left most position and maximum right most position
+	private float CamWidth, CamHeight, LevelMinX, LevelMaxX;
+
+	// Use this for initialization
+	void Start () 
+	{
+		//Gives height
+		CamWidth = Camera.main.orthographicSize * 2;
+
+		//multiplying camera height with camera aspect, gives the width
+		CamWidth = CamHeight * Camera.main.aspect;	
+
+		//width of the graphics, though we already have then set but in case something changes this code will handle
+		//InChildern because all the stripes are in children
+		//dividing by 2 because the pivot point is in the center so we need to get only half of their width
+		float LeftBoundWidth = LeftBound.GetComponentInChildren<SpriteRenderer>().bounds.size.x /2;
+		float RightBoundWidth = RigtBound.GetComponentInChildren<SpriteRenderer> ().bounds.size.x / 2;	
+
+		//Calculating MinX and MaxX
+		LevelMinX = LeftBound.position.x + LeftBoundWidth + (CamWidth / 2);
+		LevelMaxX = RigtBound.position.x - RightBoundWidth - (CamWidth / 2);
+	}
+
+	// Update is called once per frame
+	void Update () 
+	{
+		if (target) 
+		{
+			//targetX we are geeting via Mathf method Max
+			//Max returns larger of two of the values
+			//it will give a target position for our camera that stays within our bounds
+			float targetX = Mathf.Max (LevelMinX, Mathf.Min (LevelMaxX, target.position.x));
+
+			//calculating an x pos for our camera
+			//applying SmoothDamp method from the original pos to the target pos by a specific amount of time 
+			//so that the cam follows the player smoothly
+			float x = Mathf.SmoothDamp (transform.position.x, targetX, ref SmoothDampVelocity.x, SmoothDampTime);
+
+			//only the x position of the camera will be dynamic
+			//assigning x pos to our camera pos
+			transform.position = new Vector3 (x, transform.position.y, transform.position.z);
+		}
+
+	}
+}
